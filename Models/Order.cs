@@ -7,7 +7,8 @@
         // Foreign Key to the Product table (Assuming an order is linked to a product)
         public int ProductId { get; set; }
         public Product? Product { get; set; }  // Navigation property for Product
-
+        public decimal TotalAmount { get; set; }  // Add TotalAmount
+        public string Status { get; set; }
         // Additional fields for the order
         public int Quantity { get; set; }
         public DateTime OrderDate { get; set; }

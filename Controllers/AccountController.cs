@@ -1,6 +1,7 @@
 ﻿using FastFoodAPI.Models;
 using FastFoodAPI.Services;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 using System.Threading.Tasks;
 
 namespace FastFoodAPI.Controllers
@@ -43,7 +44,6 @@ namespace FastFoodAPI.Controllers
             }
         }
 
-
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginModel model)
         {
@@ -56,6 +56,68 @@ namespace FastFoodAPI.Controllers
             return Ok(new { Token = token });
         }
 
+        [HttpGet("order-history")]
+        public async Task<IActionResult> GetOrderHistory()
+        {
+            var email = User.FindFirst(ClaimTypes.Email)?.Value;
+            if (email == null)
+            {
+                return Unauthorized();
+            }
+
+            var orders = await _userService.GetOrderHistoryAsync(email);
+            return Ok(orders);
+        }
+
+        [HttpPost("update-profile")]
+        public async Task<IActionResult> UpdateProfile([FromBody] UpdateProfileModel model)
+        {
+            var email = User.FindFirst(ClaimTypes.Email)?.Value;
+            if (email == null)
+            {
+                return Unauthorized();
+            }
+
+            var result = await _userService.UpdateUserProfileAsync(email, model);
+            if (result)
+            {
+                return Ok(new { message = "Profile updated successfully" });
+            }
+
+            return BadRequest("Failed to update profile");
+        }
+
+
+        [HttpPost("set-dark-mode")]
+        public async Task<IActionResult> SetDarkMode([FromBody] bool darkMode)
+        {
+            var email = User.FindFirst(ClaimTypes.Email)?.Value;
+            if (email == null)
+            {
+                return Unauthorized();
+            }
+
+            var result = await _userService.SetDarkModePreferenceAsync(email, darkMode);
+            if (result)
+            {
+                return Ok(new { message = "Dark mode preference updated successfully" });
+            }
+
+            return BadRequest("Failed to update preference");
+        }
+
+        [HttpGet("get-dark-mode")]
+        public async Task<IActionResult> GetDarkModePreference()
+        {
+            var email = User.FindFirst(ClaimTypes.Email)?.Value;
+            if (email == null)
+            {
+                return Unauthorized();
+            }
+
+            var darkMode = await _userService.GetDarkModePreferenceAsync(email);
+            return Ok(new { darkMode });
+        }
+
     }
 }
-
