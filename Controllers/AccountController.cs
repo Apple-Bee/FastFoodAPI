@@ -1,5 +1,7 @@
 ﻿using FastFoodAPI.Models;
 using FastFoodAPI.Services;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 using System.Threading.Tasks;
@@ -27,7 +29,6 @@ namespace FastFoodAPI.Controllers
 
             try
             {
-                Console.WriteLine($"Email: {model.Email}, Password: {model.Password}");  // Log the data for debugging
                 var result = await _userService.RegisterAsync(model);
 
                 if (result)
@@ -39,7 +40,7 @@ namespace FastFoodAPI.Controllers
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message);  // Log the exception to the console
+                Console.WriteLine(ex.Message);
                 return StatusCode(500, "Internal server error");
             }
         }
@@ -53,63 +54,79 @@ namespace FastFoodAPI.Controllers
                 return Unauthorized("Invalid email or password");
             }
 
-            return Ok(new { Token = token });
+            return Ok(new { token });
         }
 
-        [HttpGet("order-history")]
-        public async Task<IActionResult> GetOrderHistory()
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [HttpGet("profile")]
+        public async Task<IActionResult> GetProfile()
         {
-            var email = User.FindFirst(ClaimTypes.Email)?.Value;
+            var email = User.FindFirst(ClaimTypes.Name)?.Value;  // Updated to ClaimTypes.Name for retrieving email
             if (email == null)
             {
                 return Unauthorized();
             }
 
-            var orders = await _userService.GetOrderHistoryAsync(email);
-            return Ok(orders);
+            var user = await _userService.GetUserByEmailAsync(email);
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(new
+            {
+                email = user.Email,
+                fullName = user.FullName,
+                darkMode = user.DarkMode
+            });
         }
 
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [HttpPost("update-profile")]
         public async Task<IActionResult> UpdateProfile([FromBody] UpdateProfileModel model)
         {
-            var email = User.FindFirst(ClaimTypes.Email)?.Value;
-            if (email == null)
+            if (!ModelState.IsValid)
             {
-                return Unauthorized();
+                return BadRequest("Invalid data");  // Model validation failed
             }
 
-            var result = await _userService.UpdateUserProfileAsync(email, model);
+            var result = await _userService.UpdateUserProfileAsync(User.Identity.Name, model);
+
             if (result)
             {
-                return Ok(new { message = "Profile updated successfully" });
+                return Ok("Profile updated successfully");
             }
-
-            return BadRequest("Failed to update profile");
+            else
+            {
+                return BadRequest("Failed to update profile");
+            }
         }
 
 
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [HttpPost("set-dark-mode")]
-        public async Task<IActionResult> SetDarkMode([FromBody] bool darkMode)
+        public async Task<IActionResult> SetDarkMode([FromBody] DarkModeRequest request)
         {
-            var email = User.FindFirst(ClaimTypes.Email)?.Value;
+            var email = User.FindFirst(ClaimTypes.Name)?.Value;
             if (email == null)
             {
                 return Unauthorized();
             }
 
-            var result = await _userService.SetDarkModePreferenceAsync(email, darkMode);
+            var result = await _userService.SetDarkModePreferenceAsync(email, request.DarkMode);
             if (result)
             {
                 return Ok(new { message = "Dark mode preference updated successfully" });
             }
 
-            return BadRequest("Failed to update preference");
+            return BadRequest("Failed to update dark mode preference");
         }
 
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [HttpGet("get-dark-mode")]
         public async Task<IActionResult> GetDarkModePreference()
         {
-            var email = User.FindFirst(ClaimTypes.Email)?.Value;
+            var email = User.FindFirst(ClaimTypes.Name)?.Value;
             if (email == null)
             {
                 return Unauthorized();
@@ -119,5 +136,11 @@ namespace FastFoodAPI.Controllers
             return Ok(new { darkMode });
         }
 
+
+        public class DarkModeRequest
+        {
+            public bool DarkMode { get; set; }
+        }
     }
 }
+

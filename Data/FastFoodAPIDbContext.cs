@@ -15,12 +15,12 @@ namespace FastFoodAPI.Data
         // DbSets representing tables in the database
         public DbSet<Product> Products { get; set; }
         public DbSet<Order> Orders { get; set; }
-        public DbSet<User> Users { get; set; }  // This represents the users table
+        public new DbSet<User> Users { get; set; }  // This represents the users table
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
-
+            modelBuilder.Entity<User>().ToTable("AppUsers");
             // Optional custom configurations
             // Example:
             // modelBuilder.Entity<Product>().HasKey(p => p.Id);

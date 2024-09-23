@@ -13,10 +13,10 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowReactApp", builder =>
     {
-        builder.WithOrigins("http://localhost:3000")  // Update with your frontend URL if needed
+        builder.WithOrigins("http://localhost:3000")
                .AllowAnyHeader()
                .AllowAnyMethod()
-               .AllowCredentials(); // Enable credentials if needed
+               .AllowCredentials();
     });
 });
 
@@ -27,28 +27,22 @@ builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddDbContext<FastFoodAPIDbContext>(options =>
 {
     var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-    options.UseMySql(connectionString, new MySqlServerVersion(new Version(8, 0, 37)));  // Update MySQL version if needed
+    options.UseMySql(connectionString, new MySqlServerVersion(new Version(8, 0, 37)));  // MySQL
 });
 
 // Add services for API and MVC controllers
 builder.Services.AddControllers();
 builder.Services.AddControllersWithViews();
 
-// Add DbContext and Identity services
-builder.Services.AddDbContext<FastFoodAPIDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
-
+// Add Identity services
 builder.Services.AddIdentity<IdentityUser, IdentityRole>()
     .AddEntityFrameworkStores<FastFoodAPIDbContext>()
     .AddDefaultTokenProviders();
 
 builder.Services.ConfigureApplicationCookie(options =>
 {
-    options.LoginPath = "/Home/Login"; // Redirect to login if unauthorized
+    options.LoginPath = "/Home/Login";
 });
-
-// Add Swagger/OpenAPI services
-builder.Services.AddEndpointsApiExplorer();
 
 // Add JWT Authentication
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -65,57 +59,54 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidateIssuerSigningKey = true,
             ValidIssuer = jwtSettings["Issuer"],
             ValidAudience = jwtSettings["Audience"],
-            IssuerSigningKey = new SymmetricSecurityKey(key)
+            IssuerSigningKey = new SymmetricSecurityKey(key),
+            ClockSkew = TimeSpan.Zero // Ensures token expires exactly at expiration time
         };
     });
 
 var app = builder.Build();
 
+// Seed roles and admin
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
-    await IdentitySeed.SeedRolesAndAdminAsync(services); // Call your seeding function here
+    await IdentitySeed.SeedRolesAndAdminAsync(services);
 }
 
 // Configure the HTTP request pipeline.
-app.UseHttpsRedirection();
-app.UseStaticFiles();
-app.UseRouting();
-
-// Enable CORS middleware
-app.UseCors("AllowReactApp");
-
-// Enable Swagger for API documentation
-
+if (app.Environment.IsDevelopment())
 {
-    app.UseExceptionHandler("/Home/Error"); // Global error handling
-    app.UseHsts(); // Enforce HTTPS Strict Transport Security
+    app.UseDeveloperExceptionPage();  // For development error handling
+}
+else
+{
+    app.UseExceptionHandler("/Home/Error");
+    app.UseHsts();
 }
 
-app.UseHttpsRedirection(); // Enforce HTTPS redirection
-app.UseStaticFiles(); // Serve static files
+app.UseHttpsRedirection();
+app.UseStaticFiles();
 
-app.UseRouting(); // Enable routing middleware
+app.UseRouting();
 
-// Enable JWT Authentication and Authorization
+// Enable CORS middleware before authentication
+app.UseCors("AllowReactApp");
+
 app.UseAuthentication();
 app.UseAuthorization();
 
-// Map API controllers for API routes
 app.MapControllers();
 
-// Map default MVC route
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
 
-
-
 try
 {
-    app.Run(); // Start the application
+    app.Run();
 }
 catch (Exception ex)
 {
-    Console.WriteLine($"An error occurred while starting the application: {ex.Message}");
+    var logger = app.Services.GetRequiredService<ILogger<Program>>();
+    logger.LogError(ex, "An error occurred while starting the application.");
 }
