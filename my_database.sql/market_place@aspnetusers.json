@@ -1,0 +1,40 @@
+{
+    "options": {
+        "schema": "market_place",
+        "table": "aspnetusers",
+        "columns": [
+            "Id",
+            "UserName",
+            "NormalizedUserName",
+            "Email",
+            "NormalizedEmail",
+            "EmailConfirmed",
+            "PasswordHash",
+            "SecurityStamp",
+            "ConcurrencyStamp",
+            "PhoneNumber",
+            "PhoneNumberConfirmed",
+            "TwoFactorEnabled",
+            "LockoutEnd",
+            "LockoutEnabled",
+            "AccessFailedCount"
+        ],
+        "defaultCharacterSet": "utf8mb4",
+        "fieldsTerminatedBy": "\t",
+        "fieldsEnclosedBy": "",
+        "fieldsOptionallyEnclosed": false,
+        "fieldsEscapedBy": "\\",
+        "linesTerminatedBy": "\n"
+    },
+    "triggers": [],
+    "includesData": true,
+    "includesDdl": true,
+    "extension": "tsv.zst",
+    "chunking": true,
+    "compression": "zstd",
+    "primaryIndex": [
+        "Id"
+    ],
+    "partitions": [],
+    "basenames": {}
+}

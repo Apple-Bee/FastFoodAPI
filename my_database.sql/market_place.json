@@ -1,0 +1,40 @@
+{
+    "schema": "market_place",
+    "includesDdl": true,
+    "includesViewsDdl": true,
+    "includesData": true,
+    "tables": [
+        "__efmigrationshistory",
+        "aspnetusertokens",
+        "aspnetroles",
+        "aspnetuserlogins",
+        "customerusers",
+        "aspnetroleclaims",
+        "aspnetuserclaims",
+        "aspnetuserroles",
+        "aspnetusers",
+        "order_items",
+        "orders",
+        "products",
+        "users"
+    ],
+    "views": [],
+    "events": [],
+    "functions": [],
+    "procedures": [],
+    "basenames": {
+        "__efmigrationshistory": "market_place@__efmigrationshistory",
+        "aspnetusertokens": "market_place@aspnetusertokens",
+        "aspnetroles": "market_place@aspnetroles",
+        "aspnetuserlogins": "market_place@aspnetuserlogins",
+        "customerusers": "market_place@customerusers",
+        "aspnetroleclaims": "market_place@aspnetroleclaims",
+        "aspnetuserclaims": "market_place@aspnetuserclaims",
+        "aspnetuserroles": "market_place@aspnetuserroles",
+        "aspnetusers": "market_place@aspnetusers",
+        "order_items": "market_place@order_items",
+        "orders": "market_place@orders",
+        "products": "market_place@products",
+        "users": "market_place@users"
+    }
+}

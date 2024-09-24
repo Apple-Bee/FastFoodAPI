@@ -1,0 +1,32 @@
+{
+    "options": {
+        "schema": "market_place",
+        "table": "users",
+        "columns": [
+            "id",
+            "email",
+            "password",
+            "full_name",
+            "created_at",
+            "dark_mode",
+            "CreatedAt"
+        ],
+        "defaultCharacterSet": "utf8mb4",
+        "fieldsTerminatedBy": "\t",
+        "fieldsEnclosedBy": "",
+        "fieldsOptionallyEnclosed": false,
+        "fieldsEscapedBy": "\\",
+        "linesTerminatedBy": "\n"
+    },
+    "triggers": [],
+    "includesData": true,
+    "includesDdl": true,
+    "extension": "tsv.zst",
+    "chunking": true,
+    "compression": "zstd",
+    "primaryIndex": [
+        "id"
+    ],
+    "partitions": [],
+    "basenames": {}
+}

@@ -1,0 +1,27 @@
+{
+    "dumper": "mysqlsh Ver 8.0.37 for Win64 on x86_64 - for MySQL 8.0.37 (MySQL Community Server (GPL))",
+    "version": "2.0.1",
+    "origin": "dumpSchemas",
+    "schemas": [
+        "market_place"
+    ],
+    "basenames": {
+        "market_place": "market_place"
+    },
+    "defaultCharacterSet": "utf8mb4",
+    "tzUtc": true,
+    "bytesPerChunk": 64000000,
+    "user": "root",
+    "hostname": "DESKTOP-F4U4IDN",
+    "server": "DESKTOP-F4U4IDN",
+    "serverVersion": "8.0.37",
+    "binlogFile": "DESKTOP-F4U4IDN-bin.000071",
+    "binlogPosition": 4760,
+    "gtidExecuted": "",
+    "gtidExecutedInconsistent": false,
+    "consistent": true,
+    "partialRevokes": false,
+    "compatibilityOptions": [],
+    "capabilities": [],
+    "begin": "2024-09-24 17:57:27"
+}

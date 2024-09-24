@@ -1,0 +1,36 @@
+{
+    "end": "2024-09-24 17:57:27",
+    "dataBytes": 1519,
+    "tableDataBytes": {
+        "market_place": {
+            "aspnetroles": 52,
+            "aspnetuserlogins": 0,
+            "aspnetusertokens": 0,
+            "__efmigrationshistory": 184,
+            "customerusers": 176,
+            "aspnetroleclaims": 0,
+            "orders": 152,
+            "order_items": 54,
+            "aspnetuserclaims": 0,
+            "aspnetuserroles": 74,
+            "users": 477,
+            "aspnetusers": 284,
+            "products": 66
+        }
+    },
+    "chunkFileBytes": {
+        "market_place@aspnetroles@@0.tsv.zst": 52,
+        "market_place@aspnetuserlogins@@0.tsv.zst": 0,
+        "market_place@__efmigrationshistory@@0.tsv.zst": 184,
+        "market_place@aspnetroleclaims@@0.tsv.zst": 0,
+        "market_place@orders@@0.tsv.zst": 152,
+        "market_place@order_items@@0.tsv.zst": 54,
+        "market_place@aspnetuserclaims@@0.tsv.zst": 0,
+        "market_place@aspnetuserroles@@0.tsv.zst": 74,
+        "market_place@customerusers@@0.tsv.zst": 176,
+        "market_place@users@@0.tsv.zst": 477,
+        "market_place@aspnetusers@@0.tsv.zst": 284,
+        "market_place@products@@0.tsv.zst": 66,
+        "market_place@aspnetusertokens@@0.tsv.zst": 0
+    }
+}

@@ -1,0 +1,31 @@
+{
+    "options": {
+        "schema": "market_place",
+        "table": "aspnetusertokens",
+        "columns": [
+            "UserId",
+            "LoginProvider",
+            "Name",
+            "Value"
+        ],
+        "defaultCharacterSet": "utf8mb4",
+        "fieldsTerminatedBy": "\t",
+        "fieldsEnclosedBy": "",
+        "fieldsOptionallyEnclosed": false,
+        "fieldsEscapedBy": "\\",
+        "linesTerminatedBy": "\n"
+    },
+    "triggers": [],
+    "includesData": true,
+    "includesDdl": true,
+    "extension": "tsv.zst",
+    "chunking": true,
+    "compression": "zstd",
+    "primaryIndex": [
+        "UserId",
+        "LoginProvider",
+        "Name"
+    ],
+    "partitions": [],
+    "basenames": {}
+}
