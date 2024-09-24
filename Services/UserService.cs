@@ -211,10 +211,6 @@ namespace FastFoodAPI.Services
 
 
 
-
-
-
-
         // Get dark mode preference
         public async Task<bool?> GetDarkModePreferenceAsync(string email)
         {
@@ -239,13 +235,21 @@ namespace FastFoodAPI.Services
         public async Task<List<Order>> GetOrderHistoryAsync(string email)
         {
             var orders = new List<Order>();
+
             using (var connection = new MySqlConnection(_config.GetConnectionString("DefaultConnection")))
             {
                 await connection.OpenAsync();
-                var query = "SELECT * FROM orders WHERE user_id = (SELECT id FROM users WHERE email = @Email)";
+
+                var query = @"
+            SELECT o.id, o.order_date, o.total_amount, o.status 
+            FROM orders o 
+            INNER JOIN users u ON o.user_id = u.id
+            WHERE u.email = @Email";
+
                 using (var cmd = new MySqlCommand(query, connection))
                 {
                     cmd.Parameters.AddWithValue("@Email", email);
+
                     using (var reader = await cmd.ExecuteReaderAsync())
                     {
                         while (await reader.ReadAsync())
@@ -253,16 +257,84 @@ namespace FastFoodAPI.Services
                             orders.Add(new Order
                             {
                                 Id = Convert.ToInt32(reader["id"]),
-                                OrderDate = Convert.ToDateTime(reader["order_date"]),
-                                TotalAmount = Convert.ToDecimal(reader["total_amount"]),
-                                Status = reader["status"].ToString()
+                                OrderDate = reader["order_date"] != DBNull.Value ? Convert.ToDateTime(reader["order_date"]) : DateTime.MinValue,
+                                TotalAmount = reader["total_amount"] != DBNull.Value ? Convert.ToDecimal(reader["total_amount"]) : 0,
+                                Status = reader["status"]?.ToString()
                             });
                         }
                     }
                 }
             }
+
             return orders;
         }
+
+        public async Task<bool> PlaceOrderAsync(string email, CreateOrderModel model)
+        {
+            try
+            {
+                using (var connection = new MySqlConnection(_config.GetConnectionString("DefaultConnection")))
+                {
+                    await connection.OpenAsync();
+
+                    // Step 1: Get the user's ID based on their email
+                    var getUserIdQuery = "SELECT id FROM users WHERE email = @Email";
+                    int userId;
+                    using (var getUserIdCmd = new MySqlCommand(getUserIdQuery, connection))
+                    {
+                        getUserIdCmd.Parameters.AddWithValue("@Email", email);
+                        userId = Convert.ToInt32(await getUserIdCmd.ExecuteScalarAsync());
+                    }
+
+                    if (userId == 0)
+                    {
+                        throw new Exception("User not found");
+                    }
+
+                    // Step 2: Insert the new order into the `orders` table
+                    var insertOrderQuery = "INSERT INTO orders (user_id, order_date, total_amount, status) VALUES (@UserId, @OrderDate, @TotalAmount, @Status)";
+                    long orderId;
+                    using (var insertOrderCmd = new MySqlCommand(insertOrderQuery, connection))
+                    {
+                        insertOrderCmd.Parameters.AddWithValue("@UserId", userId);
+                        insertOrderCmd.Parameters.AddWithValue("@OrderDate", DateTime.UtcNow);
+                        insertOrderCmd.Parameters.AddWithValue("@TotalAmount", model.TotalAmount);
+                        insertOrderCmd.Parameters.AddWithValue("@Status", "Pending");
+
+                        await insertOrderCmd.ExecuteNonQueryAsync();
+                        orderId = insertOrderCmd.LastInsertedId;  // Get the inserted order ID
+                    }
+
+                    // Step 3: Insert each order item into an `order_items` table (if you have one)
+                    var insertItemQuery = "INSERT INTO order_items (order_id, product_name, quantity, price) VALUES (@OrderId, @ProductName, @Quantity, @Price)";
+                    using (var insertItemCmd = new MySqlCommand(insertItemQuery, connection))
+                    {
+                        insertItemCmd.Parameters.Add("@OrderId", MySqlDbType.Int64);
+                        insertItemCmd.Parameters.Add("@ProductName", MySqlDbType.VarChar);
+                        insertItemCmd.Parameters.Add("@Quantity", MySqlDbType.Int32);
+                        insertItemCmd.Parameters.Add("@Price", MySqlDbType.Decimal);
+
+                        foreach (var item in model.Items)
+                        {
+                            insertItemCmd.Parameters["@OrderId"].Value = orderId;
+                            insertItemCmd.Parameters["@ProductName"].Value = item.Name;
+                            insertItemCmd.Parameters["@Quantity"].Value = item.Quantity;
+                            insertItemCmd.Parameters["@Price"].Value = item.Price;
+                            await insertItemCmd.ExecuteNonQueryAsync();
+                        }
+                    }
+
+                    return true; // Order and items inserted successfully
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error placing order: {ex.Message}");
+                return false;
+            }
+        }
+
+
 
         // Validate password
         public bool ValidatePassword(string password, string hashedPassword)

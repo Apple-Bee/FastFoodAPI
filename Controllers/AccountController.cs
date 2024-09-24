@@ -141,6 +141,60 @@ namespace FastFoodAPI.Controllers
         {
             public bool DarkMode { get; set; }
         }
+
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [HttpGet("order-history")]
+        public async Task<IActionResult> GetOrderHistory()
+        {
+            // Get the logged-in user's email from the JWT token
+            var email = User.FindFirst(ClaimTypes.Name)?.Value;
+
+            if (email == null)
+            {
+                return Unauthorized();
+            }
+
+            // Call the service to get the user's order history
+            var orders = await _userService.GetOrderHistoryAsync(email);
+
+            if (orders == null || !orders.Any())
+            {
+                return NotFound("No orders found for this user.");
+            }
+
+            // Return the order history
+            return Ok(orders.Select(order => new
+            {
+                orderId = order.Id,
+                orderDate = order.OrderDate,
+                totalAmount = order.TotalAmount,
+                status = order.Status
+            }));
+        }
+
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [HttpPost("create")]
+        public async Task<IActionResult> PlaceOrder([FromBody] CreateOrderModel model)
+        {
+            var email = User.FindFirst(ClaimTypes.Name)?.Value;
+            if (email == null)
+            {
+                return Unauthorized();
+            }
+
+            var result = await _userService.PlaceOrderAsync(email, model);
+            if (result)
+            {
+                return Ok(new { message = "Order placed successfully" });
+            }
+
+            return StatusCode(500, "Failed to place order");
+        }
+
+
+        // CreateOrderModel class to receive the items and total pri
+
+
     }
 }
 

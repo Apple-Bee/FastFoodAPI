@@ -15,6 +15,7 @@ namespace FastFoodAPI.Services
         Task<List<Order>> GetOrderHistoryAsync(string email);
         bool ValidatePassword(string password, string hashedPassword);
         string GenerateJwtToken(User user); // Ensure this method is in the interface
+        Task<bool> PlaceOrderAsync(string email, CreateOrderModel model);
     }
 }
 
